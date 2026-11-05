@@ -225,17 +225,8 @@ Cambiar de proveedor (Groq, OpenRouter, Ollama local) solo requiere modificar `B
 
 ---
 
-## Próximos pasos
-
-- Cliente web **Angular 20 + Tailwind CSS v4** (Signals, zoneless) con chat en streaming y panel de administración.
-- Historial de conversación con memoria del agente.
-- Integración con un proveedor de identidad (Entra ID o Keycloak) para producción.
-- Evaluación automática de la calidad de las respuestas RAG.
-
----
-
 ## Autor
 
 **Iván** · Desarrollador Senior Full-Stack .NET con más de 20 años de experiencia, especializado en arquitectura limpia y en la integración de IA generativa en aplicaciones empresariales.
 
-[LinkedIn](https://www.linkedin.com/in/tu-usuario) · [GitHub](https://github.com/tu-usuario)
+[LinkedIn](https://www.linkedin.com/in/ivanpeinadocoiradas) · [GitHub](https://github.com/ipeinadocoiradas)
