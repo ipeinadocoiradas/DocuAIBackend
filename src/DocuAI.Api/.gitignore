@@ -1,0 +1,29 @@
+## Opciones del Usuario
+*.user
+*.userosscache
+*.sln.docstates
+
+## Carpetas de Compilación (Código generado automáticamente)
+[Db]in/
+[Ob]j/
+[Log]s/
+
+## Herramientas y paquetes externos
+.library/
+packages/
+!.nuget/packages/
+project.lock.json
+project.fragment.lock.json
+artifacts/
+
+## Archivo de configuración local con tu SecretKey
+appsettings.Development.json
+
+## Entornos virtuales y carpetas de editores comunes
+.vs/
+.vscode/
+.idea/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
