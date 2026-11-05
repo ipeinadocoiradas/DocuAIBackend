@@ -227,6 +227,6 @@ Cambiar de proveedor (Groq, OpenRouter, Ollama local) solo requiere modificar `B
 
 ## Autor
 
-**Iván** · Desarrollador Senior Full-Stack .NET con más de 20 años de experiencia, especializado en arquitectura limpia y en la integración de IA generativa en aplicaciones empresariales.
+**Iván Peinado Coiradas** · Desarrollador Senior Full-Stack .NET con más de 20 años de experiencia, especializado en arquitectura limpia y en la integración de IA generativa en aplicaciones empresariales.
 
 [LinkedIn](https://www.linkedin.com/in/ivanpeinadocoiradas) · [GitHub](https://github.com/ipeinadocoiradas)
