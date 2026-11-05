@@ -1,0 +1,18 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/DocuAI.Domain/DocuAI.Domain.csproj" />
+    <Project Path="src/DocuAI.Application/DocuAI.Application.csproj" />
+    <Project Path="src/DocuAI.Infrastructure/DocuAI.Infrastructure.csproj" />
+    <Project Path="src/DocuAI.Api/DocuAI.Api.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/DocuAI.UnitTests/DocuAI.UnitTests.csproj" />
+  </Folder>
+  <Folder Name="/Solution Items/">
+    <File Path="Directory.Build.props" />
+    <File Path="Directory.Packages.props" />
+    <File Path="global.json" />
+    <File Path="docker-compose.yml" />
+    <File Path="README.md" />
+  </Folder>
+</Solution>

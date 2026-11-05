@@ -1,0 +1,14 @@
+## .NET / Visual Studio
+bin/
+obj/
+.vs/
+*.user
+*.suo
+TestResults/
+*.swp
+
+/docker/
+
+## Secretos locales
+.env
+appsettings.*.local.json

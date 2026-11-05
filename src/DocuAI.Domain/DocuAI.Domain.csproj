@@ -1,0 +1,6 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- Capa de dominio: sin dependencias externas. -->
+  <PropertyGroup>
+    <RootNamespace>DocuAI.Domain</RootNamespace>
+  </PropertyGroup>
+</Project>

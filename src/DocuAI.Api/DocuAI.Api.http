@@ -1,0 +1,69 @@
+### Peticiones de ejemplo para el cliente HTTP de Visual Studio
+@baseUrl = https://localhost:7180
+
+### 1. Token de administrador (emisor local de desarrollo)
+# @name adminLogin
+POST {{baseUrl}}/api/auth/token
+Content-Type: application/json
+
+{
+  "userName": "admin",
+  "password": "{{$dotenv ADMIN_PASSWORD}}"
+}
+
+### 2. Token de usuario de chat
+# @name userLogin
+POST {{baseUrl}}/api/auth/token
+Content-Type: application/json
+
+{
+  "userName": "user",
+  "password": "{{$dotenv USER_PASSWORD}}"
+}
+
+### 3. Subir un documento (rol Admin)
+POST {{baseUrl}}/api/documents/upload
+Authorization: Bearer {{adminLogin.response.body.$.accessToken}}
+Content-Type: multipart/form-data; boundary=DocuAIBoundary
+
+--DocuAIBoundary
+Content-Disposition: form-data; name="file"; filename="manual.pdf"
+Content-Type: application/pdf
+
+< ./samples/manual.pdf
+--DocuAIBoundary--
+
+### 4. Listar documentos (rol Admin)
+GET {{baseUrl}}/api/documents?page=1&pageSize=20
+Authorization: Bearer {{adminLogin.response.body.$.accessToken}}
+
+### 4b. Listar con filtros: nombre, varios estados, rango de fechas [desde, hasta) y orden
+# @name listFiltered
+GET {{baseUrl}}/api/documents?search=manual&status=Processed&status=Failed&uploadedFrom=2026-10-01T00:00:00%2B02:00&uploadedTo=2026-11-01T00:00:00%2B01:00&sortBy=FileName&sortDirection=Asc&page=1&pageSize=10
+Authorization: Bearer {{adminLogin.response.body.$.accessToken}}
+
+### 4c. Estado de un documento (polling tras la subida; misma URL que la cabecera Location)
+@documentId = {{listFiltered.response.body.$.items[0].id}}
+GET {{baseUrl}}/api/documents/{{documentId}}
+Authorization: Bearer {{adminLogin.response.body.$.accessToken}}
+
+### 4d. Eliminar un documento y sus fragmentos (204; 409 si se está procesando)
+DELETE {{baseUrl}}/api/documents/{{documentId}}
+Authorization: Bearer {{adminLogin.response.body.$.accessToken}}
+
+### 4e. Preflight CORS desde el front (debe devolver 204 con Access-Control-Allow-*)
+OPTIONS {{baseUrl}}/api/documents
+Origin: http://localhost:4200
+Access-Control-Request-Method: DELETE
+Access-Control-Request-Headers: authorization
+
+### 5. Consulta al chat con streaming SSE (rol User)
+POST {{baseUrl}}/api/chat/query
+Authorization: Bearer {{userLogin.response.body.$.accessToken}}
+Content-Type: application/json
+Accept: text/event-stream
+
+{
+  "question": "¿Cuál es el procedimiento para solicitar vacaciones?",
+  "topK": 5
+}

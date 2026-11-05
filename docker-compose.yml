@@ -1,0 +1,103 @@
+# =============================================================================
+# DocuAI API - Infraestructura local
+#   - postgres           : PostgreSQL 17 + extensión pgvector (almacén vectorial)
+#   - ollama             : servidor de embeddings local (API compatible con OpenAI)
+#   - ollama-pull-model  : tarea única que descarga el modelo bge-m3 y termina
+#
+# Uso:
+#   echo "POSTGRES_PASSWORD=<tu-password>" > .env
+#   docker compose up -d
+#   docker compose logs -f ollama-pull-model    # espera a "success"
+# =============================================================================
+name: docuai
+
+services:
+
+  # ---------------------------------------------------------------------------
+  # PostgreSQL + pgvector
+  # ---------------------------------------------------------------------------
+  postgres:
+    image: pgvector/pgvector:pg17
+    container_name: docuai-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-docuai}
+      POSTGRES_USER: ${POSTGRES_USER:-docuai}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Define POSTGRES_PASSWORD en el fichero .env}
+      # Autenticación robusta también para conexiones locales del contenedor.
+      POSTGRES_INITDB_ARGS: "--auth-host=scram-sha-256"
+    # Ajustes para la construcción de índices HNSW: más memoria de mantenimiento
+    # evita que el índice se construya en disco (mucho más lento).
+    command:
+      - "postgres"
+      - "-c"
+      - "maintenance_work_mem=512MB"
+      - "-c"
+      - "max_parallel_maintenance_workers=2"
+    # La construcción paralela de índices usa memoria compartida (/dev/shm).
+    shm_size: 1gb
+    ports:
+      # Solo en loopback: la base de datos no queda expuesta a la red.
+      - "127.0.0.1:${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      # Scripts que se ejecutan solo la primera vez (volumen vacío).
+      - ./docker/postgres/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
+  # ---------------------------------------------------------------------------
+  # Ollama (embeddings locales)
+  # ---------------------------------------------------------------------------
+  ollama:
+    image: ollama/ollama:latest
+    container_name: docuai-ollama
+    restart: unless-stopped
+    environment:
+      # Mantiene el modelo cargado en memoria: evita la carga en frío en cada lote.
+      OLLAMA_KEEP_ALIVE: "24h"
+      # Peticiones concurrentes por modelo (el worker de ingesta es secuencial,
+      # pero las consultas del chat también generan embeddings).
+      OLLAMA_NUM_PARALLEL: "2"
+    ports:
+      - "127.0.0.1:${OLLAMA_PORT:-11434}:11434"
+    volumes:
+      - ollama-data:/root/.ollama
+    healthcheck:
+      test: ["CMD", "ollama", "list"]
+      interval: 15s
+      timeout: 10s
+      retries: 5
+      start_period: 15s
+    # --- GPU NVIDIA (requiere NVIDIA Container Toolkit) -----------------------
+    # Descomenta para acelerar la generación de embeddings.
+    # deploy:
+    #   resources:
+    #     reservations:
+    #       devices:
+    #         - driver: nvidia
+    #           count: all
+    #           capabilities: [gpu]
+
+  # ---------------------------------------------------------------------------
+  # Descarga del modelo de embeddings (se ejecuta una vez y termina)
+  # Es idempotente: si el modelo ya está en el volumen, solo verifica capas.
+  # ---------------------------------------------------------------------------
+  ollama-pull-model:
+    image: ollama/ollama:latest
+    container_name: docuai-ollama-pull-model
+    restart: "no"
+    environment:
+      OLLAMA_HOST: "ollama:11434"
+    entrypoint: ["ollama", "pull", "${EMBEDDINGS_MODEL:-bge-m3}"]
+    depends_on:
+      ollama:
+        condition: service_healthy
+
+volumes:
+  postgres-data:
+  ollama-data:
